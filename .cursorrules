@@ -1,0 +1,155 @@
+# Cursor Rules for Portfolio Site Deployment
+
+## 🚀 Deployment Workflow
+
+### Automatic Deployment (Recommended)
+- **GitHub Actions**: Automatically deploys to GitHub Pages when pushing to main branch
+- **Trigger**: Any push to main branch
+- **Result**: Site updated at https://muahuavang.github.io/My-Portfolio-Site/
+
+### Manual Deployment
+- **PowerShell**: Use `deploy.ps1` for Windows
+- **Bash**: Use `deploy.sh` for cross-platform (Git Bash, WSL)
+- **Git Commands**: Standard git workflow
+
+## 📋 Pre-Deployment Checklist
+
+Before deploying, ensure:
+- [ ] All changes are tested locally
+- [ ] No console errors in browser
+- [ ] Responsive design works on mobile/tablet
+- [ ] All links are functional
+- [ ] Images are optimized
+- [ ] Content is up-to-date
+
+## 🔧 Quick Deploy Commands
+
+### From Cursor Terminal (PowerShell)
+```powershell
+# Quick deploy with default message
+.\deploy.ps1
+
+# Deploy with custom commit message
+.\deploy.ps1 -CommitMessage "Add new project section"
+
+# Force deploy from any branch
+.\deploy.ps1 -Force
+```
+
+### From Cursor Terminal (Git Bash)
+```bash
+# Quick deploy with default message
+./deploy.sh
+
+# Deploy with custom commit message
+./deploy.sh -m "Add new project section"
+
+# Force deploy from any branch
+./deploy.sh -f
+```
+
+### Standard Git Commands
+```bash
+git add .
+git commit -m "Your commit message"
+git push origin main
+```
+
+## 🎯 File Organization Rules
+
+### HTML Structure
+- Keep semantic HTML structure
+- Use proper heading hierarchy (h1, h2, h3)
+- Include alt text for all images
+- Maintain accessibility standards
+
+### CSS Guidelines
+- Use CSS variables for consistent theming
+- Follow mobile-first responsive design
+- Keep animations smooth (60fps)
+- Use modern CSS features with fallbacks
+
+### JavaScript Best Practices
+- Minimize DOM manipulation
+- Use event delegation where possible
+- Implement proper error handling
+- Keep functions small and focused
+
+## 🚨 Common Issues & Solutions
+
+### GitHub Pages Not Updating
+1. Check GitHub Actions tab for deployment status
+2. Verify gh-pages branch exists
+3. Ensure GitHub Pages is enabled in repository settings
+4. Wait 5-10 minutes for changes to propagate
+
+### Build Errors
+1. Check browser console for JavaScript errors
+2. Validate HTML structure
+3. Verify CSS syntax
+4. Test in multiple browsers
+
+### Performance Issues
+1. Optimize images (compress, use WebP format)
+2. Minimize CSS/JS files
+3. Enable browser caching
+4. Use CDN for external resources
+
+## 📱 Testing Checklist
+
+### Desktop Testing
+- [ ] Chrome (latest)
+- [ ] Firefox (latest)
+- [ ] Safari (latest)
+- [ ] Edge (latest)
+
+### Mobile Testing
+- [ ] iOS Safari
+- [ ] Android Chrome
+- [ ] Responsive breakpoints
+- [ ] Touch interactions
+
+### Accessibility Testing
+- [ ] Keyboard navigation
+- [ ] Screen reader compatibility
+- [ ] Color contrast ratios
+- [ ] Focus indicators
+
+## 🔄 Update Workflow
+
+1. **Make Changes**: Edit files in Cursor
+2. **Test Locally**: Open index.html in browser
+3. **Commit**: Use deployment script or git commands
+4. **Push**: Automatically triggers GitHub Actions
+5. **Verify**: Check GitHub Actions and live site
+
+## 📞 Support Resources
+
+- **GitHub Issues**: Report bugs in repository
+- **GitHub Pages Docs**: https://pages.github.com/
+- **GitHub Actions Docs**: https://docs.github.com/en/actions
+- **Portfolio Template**: Based on modern web standards
+
+## 🎨 Customization Notes
+
+- Update personal information in `index.html`
+- Modify color scheme in `styles.css` CSS variables
+- Add new projects to the projects section
+- Customize animations in `script.js`
+- Replace placeholder content with real examples
+
+## ⚡ Performance Tips
+
+- Optimize images before adding to project
+- Use semantic HTML for better SEO
+- Implement lazy loading for images
+- Minimize HTTP requests
+- Enable GZIP compression on server
+
+## 🔒 Security Considerations
+
+- Never commit sensitive information
+- Use HTTPS for all external links
+- Validate user inputs in forms
+- Keep dependencies updated
+- Follow OWASP security guidelines
