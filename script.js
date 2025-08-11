@@ -1,290 +1,486 @@
-// DOM Elements
-const themeToggle = document.getElementById('themeToggle');
-const body = document.body;
-const floatingContact = document.getElementById('floatingContact');
-const headerContactBtn = document.getElementById('contactBtn');
+/**
+ * Portfolio Site - Main JavaScript File
+ * Handles theme switching, smooth scrolling, form validation, and animations
+ * @author Muahua Ulysses Vang
+ * @version 1.0.0
+ */
 
-// Theme Toggle Functionality
-function toggleTheme() {
-    const isDarkMode = body.classList.contains('dark-mode');
-    
-    if (isDarkMode) {
-        body.classList.remove('dark-mode');
-        themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-        localStorage.setItem('theme', 'light');
-    } else {
-        body.classList.add('dark-mode');
-        themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
-        localStorage.setItem('theme', 'dark');
+// ============================================================================
+// CONSTANTS & CONFIGURATION
+// ============================================================================
+
+const THEME_STORAGE_KEY = 'theme';
+const SCROLL_THROTTLE_DELAY = 100;
+const ANIMATION_DELAY = 100;
+
+// ============================================================================
+// DOM ELEMENTS
+// ============================================================================
+
+const DOM_ELEMENTS = {
+  themeToggle: document.getElementById('themeToggle'),
+  body: document.body,
+  floatingContact: document.getElementById('floatingContact'),
+  headerContactBtn: document.getElementById('contactBtn'),
+  header: document.querySelector('.header'),
+  contactSection: document.querySelector('#contact'),
+  contactForm: document.querySelector('.contact-form'),
+  navLinks: document.querySelectorAll('.nav-link, .btn[href^="#"]'),
+  contactButtons: document.querySelectorAll('.contact-btn, .floating .contact-btn'),
+  projectCards: document.querySelectorAll('.project-card'),
+  mobileMenuToggle: document.querySelector('.mobile-menu-toggle'),
+  mobileMenu: document.querySelector('.mobile-menu')
+};
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+/**
+ * Throttles function execution to improve performance
+ * @param {Function} func - Function to throttle
+ * @param {number} limit - Time limit in milliseconds
+ * @returns {Function} Throttled function
+ */
+function throttle(func, limit) {
+  let inThrottle;
+  return function(...args) {
+    if (!inThrottle) {
+      func.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
     }
+  };
 }
 
-// Initialize theme from localStorage
+/**
+ * Safely gets an element by ID with error handling
+ * @param {string} id - Element ID
+ * @param {string} context - Context for error message
+ * @returns {HTMLElement|null} Element or null if not found
+ */
+function getElementById(id, context = '') {
+  const element = document.getElementById(id);
+  if (!element) {
+    console.warn(`Element with ID '${id}' not found${context ? ` in ${context}` : ''}`);
+  }
+  return element;
+}
+
+/**
+ * Shows notification message to user
+ * @param {string} message - Message to display
+ * @param {string} type - Type of notification (success, error, info)
+ * @param {number} duration - Display duration in milliseconds
+ */
+function showNotification(message, type = 'info', duration = 3000) {
+  const notification = document.createElement('div');
+  notification.className = `notification notification-${type}`;
+  notification.textContent = message;
+  
+  // Add to DOM
+  document.body.appendChild(notification);
+  
+  // Auto-remove after duration
+  setTimeout(() => {
+    if (notification.parentNode) {
+      notification.remove();
+    }
+  }, duration);
+}
+
+// ============================================================================
+// THEME MANAGEMENT
+// ============================================================================
+
+/**
+ * Toggles between light and dark themes
+ * Updates localStorage and UI accordingly
+ */
+function toggleTheme() {
+  try {
+    const isDarkMode = DOM_ELEMENTS.body.classList.contains('dark-mode');
+    
+    if (isDarkMode) {
+      DOM_ELEMENTS.body.classList.remove('dark-mode');
+      DOM_ELEMENTS.themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+      localStorage.setItem(THEME_STORAGE_KEY, 'light');
+    } else {
+      DOM_ELEMENTS.body.classList.add('dark-mode');
+      DOM_ELEMENTS.themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+      localStorage.setItem(THEME_STORAGE_KEY, 'dark');
+    }
+  } catch (error) {
+    console.error('Error toggling theme:', error);
+    showNotification('Error changing theme', 'error');
+  }
+}
+
+/**
+ * Initializes theme from localStorage or system preference
+ * Sets appropriate theme and updates toggle button
+ */
 function initializeTheme() {
-    const savedTheme = localStorage.getItem('theme');
+  try {
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     
     if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-        body.classList.add('dark-mode');
-        themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+      DOM_ELEMENTS.body.classList.add('dark-mode');
+      DOM_ELEMENTS.themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
     } else {
-        body.classList.remove('dark-mode');
-        themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+      DOM_ELEMENTS.body.classList.remove('dark-mode');
+      DOM_ELEMENTS.themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
     }
+  } catch (error) {
+    console.error('Error initializing theme:', error);
+    // Fallback to light theme
+    DOM_ELEMENTS.body.classList.remove('dark-mode');
+    DOM_ELEMENTS.themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+  }
 }
 
-// Floating Contact Button Functionality
+// ============================================================================
+// SCROLL HANDLING
+// ============================================================================
+
+/**
+ * Handles scroll events to show/hide floating contact button
+ * Uses throttling for performance optimization
+ */
 function handleScroll() {
+  try {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const headerHeight = document.querySelector('.header').offsetHeight;
+    const headerHeight = DOM_ELEMENTS.header?.offsetHeight || 0;
+    
+    if (!DOM_ELEMENTS.floatingContact) {
+      console.warn('Floating contact button not found');
+      return;
+    }
     
     // Show floating contact button when scrolled past header
     if (scrollTop > headerHeight) {
-        floatingContact.classList.add('visible');
+      DOM_ELEMENTS.floatingContact.classList.add('visible');
     } else {
-        floatingContact.classList.remove('visible');
+      DOM_ELEMENTS.floatingContact.classList.remove('visible');
     }
+  } catch (error) {
+    console.error('Error handling scroll:', error);
+  }
 }
 
-// Smooth scrolling for navigation links
+// Throttled scroll handler for better performance
+const throttledScrollHandler = throttle(handleScroll, SCROLL_THROTTLE_DELAY);
+
+// ============================================================================
+// SMOOTH SCROLLING
+// ============================================================================
+
+/**
+ * Sets up smooth scrolling for navigation links
+ * Handles both nav links and buttons with href attributes
+ */
 function setupSmoothScrolling() {
-    const navLinks = document.querySelectorAll('.nav-link, .btn[href^="#"]');
-    
-    navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            const targetId = this.getAttribute('href');
-            const targetSection = document.querySelector(targetId);
-            
-            if (targetSection) {
-                const headerHeight = document.querySelector('.header').offsetHeight;
-                const targetPosition = targetSection.offsetTop - headerHeight;
-                
-                window.scrollTo({
-                    top: targetPosition,
-                    behavior: 'smooth'
-                });
-            }
+  if (!DOM_ELEMENTS.navLinks.length) {
+    console.warn('No navigation links found');
+    return;
+  }
+  
+  DOM_ELEMENTS.navLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      const targetId = this.getAttribute('href');
+      if (!targetId || targetId === '#') return;
+      
+      const targetSection = document.querySelector(targetId);
+      if (!targetSection) {
+        console.warn(`Target section '${targetId}' not found`);
+        return;
+      }
+      
+      try {
+        const headerHeight = DOM_ELEMENTS.header?.offsetHeight || 0;
+        const targetPosition = targetSection.offsetTop - headerHeight;
+        
+        window.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth'
         });
+      } catch (error) {
+        console.error('Error scrolling to target:', error);
+        // Fallback to instant scroll
+        window.scrollTo(0, targetSection.offsetTop);
+      }
     });
+  });
 }
 
-// Contact button functionality
+// ============================================================================
+// CONTACT FUNCTIONALITY
+// ============================================================================
+
+/**
+ * Sets up contact button functionality
+ * Handles both header and floating contact buttons
+ */
 function setupContactButtons() {
-    const contactButtons = document.querySelectorAll('.contact-btn, .floating .contact-btn');
-    
-    contactButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            // Scroll to contact section
-            const contactSection = document.querySelector('#contact');
-            if (contactSection) {
-                const headerHeight = document.querySelector('.header').offsetHeight;
-                const targetPosition = contactSection.offsetTop - headerHeight;
-                
-                window.scrollTo({
-                    top: targetPosition,
-                    behavior: 'smooth'
-                });
-            }
+  if (!DOM_ELEMENTS.contactButtons.length) {
+    console.warn('No contact buttons found');
+    return;
+  }
+  
+  DOM_ELEMENTS.contactButtons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      if (!DOM_ELEMENTS.contactSection) {
+        console.warn('Contact section not found');
+        return;
+      }
+      
+      try {
+        const headerHeight = DOM_ELEMENTS.header?.offsetHeight || 0;
+        const targetPosition = DOM_ELEMENTS.contactSection.offsetTop - headerHeight;
+        
+        window.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth'
         });
+      } catch (error) {
+        console.error('Error scrolling to contact section:', error);
+        // Fallback to instant scroll
+        window.scrollTo(0, DOM_ELEMENTS.contactSection.offsetTop);
+      }
     });
+  });
 }
 
-// Form submission handling
+/**
+ * Validates email format
+ * @param {string} email - Email to validate
+ * @returns {boolean} True if email is valid
+ */
+function isValidEmail(email) {
+  if (!email || typeof email !== 'string') return false;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email.trim());
+}
+
+/**
+ * Validates form input
+ * @param {string} value - Input value
+ * @param {number} minLength - Minimum required length
+ * @param {number} maxLength - Maximum allowed length
+ * @returns {boolean} True if input is valid
+ */
+function isValidInput(value, minLength = 1, maxLength = 1000) {
+  if (!value || typeof value !== 'string') return false;
+  const trimmedValue = value.trim();
+  return trimmedValue.length >= minLength && trimmedValue.length <= maxLength;
+}
+
+/**
+ * Sets up contact form with validation and submission handling
+ */
 function setupContactForm() {
-    const contactForm = document.querySelector('.contact-form');
+  if (!DOM_ELEMENTS.contactForm) {
+    console.warn('Contact form not found');
+    return;
+  }
+  
+  DOM_ELEMENTS.contactForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
     
-    if (contactForm) {
-        contactForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Get form data
-            const formData = new FormData(this);
-            const name = this.querySelector('input[type="text"]').value;
-            const email = this.querySelector('input[type="email"]').value;
-            const message = this.querySelector('textarea').value;
-            
-            // Simple validation
-            if (!name || !email || !message) {
-                alert('Please fill in all fields.');
-                return;
-            }
-            
-            // Email validation
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                alert('Please enter a valid email address.');
-                return;
-            }
-            
-            // Simulate form submission (replace with actual form handling)
-            alert('Thank you for your message! I\'ll get back to you soon.');
-            this.reset();
-        });
+    try {
+      const formData = new FormData(this);
+      const name = formData.get('name') || '';
+      const email = formData.get('email') || '';
+      const message = formData.get('message') || '';
+      
+      // Validate inputs
+      if (!isValidInput(name, 2, 100)) {
+        showNotification('Please enter a valid name (2-100 characters)', 'error');
+        return;
+      }
+      
+      if (!isValidEmail(email)) {
+        showNotification('Please enter a valid email address', 'error');
+        return;
+      }
+      
+      if (!isValidInput(message, 10, 1000)) {
+        showNotification('Please enter a message (10-1000 characters)', 'error');
+        return;
+      }
+      
+      // Show loading state
+      const submitButton = this.querySelector('button[type="submit"]');
+      const originalText = submitButton.textContent;
+      submitButton.textContent = 'Sending...';
+      submitButton.disabled = true;
+      
+      // Simulate form submission (replace with actual API call)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Success handling
+      showNotification('Message sent successfully!', 'success');
+      this.reset();
+      
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      showNotification('Error sending message. Please try again.', 'error');
+    } finally {
+      // Reset button state
+      const submitButton = this.querySelector('button[type="submit"]');
+      submitButton.textContent = 'Send Message';
+      submitButton.disabled = false;
     }
+  });
 }
 
-// Intersection Observer for animations
+// ============================================================================
+// ANIMATIONS
+// ============================================================================
+
+/**
+ * Sets up scroll-triggered animations for project cards
+ * Uses Intersection Observer API for performance
+ */
 function setupAnimations() {
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-    
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    }, observerOptions);
-    
-    // Observe elements for animation
-    const animatedElements = document.querySelectorAll('.project-card, .skill-category, .stat');
-    animatedElements.forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(30px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
+  if (!DOM_ELEMENTS.projectCards.length) {
+    console.warn('No project cards found for animations');
+    return;
+  }
+  
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, index) => {
+      if (entry.isIntersecting) {
+        // Add staggered animation delay
+        setTimeout(() => {
+          entry.target.classList.add('animate-in');
+        }, index * ANIMATION_DELAY);
+        
+        // Stop observing after animation
+        observer.unobserve(entry.target);
+      }
     });
+  }, observerOptions);
+  
+  DOM_ELEMENTS.projectCards.forEach(card => {
+    observer.observe(card);
+  });
 }
 
-// Mobile menu functionality (for smaller screens)
+// ============================================================================
+// MOBILE MENU
+// ============================================================================
+
+/**
+ * Sets up mobile menu functionality
+ * Handles toggle, close on link click, and resize events
+ */
 function setupMobileMenu() {
-    const nav = document.querySelector('.nav');
-    const navList = document.querySelector('.nav-list');
-    
-    // Create mobile menu button
-    const mobileMenuBtn = document.createElement('button');
-    mobileMenuBtn.className = 'mobile-menu-btn';
-    mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
-    mobileMenuBtn.style.display = 'none';
-    
-    // Insert mobile menu button before nav
-    nav.insertBefore(mobileMenuBtn, navList);
-    
-    // Toggle mobile menu
-    mobileMenuBtn.addEventListener('click', () => {
-        navList.classList.toggle('active');
-        mobileMenuBtn.innerHTML = navList.classList.contains('active') 
-            ? '<i class="fas fa-times"></i>' 
-            : '<i class="fas fa-bars"></i>';
-    });
-    
-    // Close mobile menu when clicking on a link
-    navList.addEventListener('click', (e) => {
-        if (e.target.classList.contains('nav-link')) {
-            navList.classList.remove('active');
-            mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
-        }
-    });
-    
-    // Show/hide mobile menu button based on screen size
-    function handleResize() {
-        if (window.innerWidth <= 768) {
-            mobileMenuBtn.style.display = 'block';
-            navList.style.display = 'none';
-        } else {
-            mobileMenuBtn.style.display = 'none';
-            navList.style.display = 'flex';
-            navList.classList.remove('active');
-        }
+  if (!DOM_ELEMENTS.mobileMenuToggle || !DOM_ELEMENTS.mobileMenu) {
+    console.warn('Mobile menu elements not found');
+    return;
+  }
+  
+  // Toggle mobile menu
+  DOM_ELEMENTS.mobileMenuToggle.addEventListener('click', function() {
+    try {
+      const isOpen = DOM_ELEMENTS.mobileMenu.classList.contains('active');
+      
+      if (isOpen) {
+        DOM_ELEMENTS.mobileMenu.classList.remove('active');
+        this.setAttribute('aria-expanded', 'false');
+      } else {
+        DOM_ELEMENTS.mobileMenu.classList.add('active');
+        this.setAttribute('aria-expanded', 'true');
+      }
+    } catch (error) {
+      console.error('Error toggling mobile menu:', error);
     }
-    
-    // Initial setup
-    handleResize();
-    
-    // Listen for window resize
-    window.addEventListener('resize', handleResize);
+  });
+  
+  // Close menu when clicking on links
+  const mobileLinks = DOM_ELEMENTS.mobileMenu.querySelectorAll('a');
+  mobileLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      DOM_ELEMENTS.mobileMenu.classList.remove('active');
+      DOM_ELEMENTS.mobileMenuToggle.setAttribute('aria-expanded', 'false');
+    });
+  });
+  
+  // Handle window resize
+  let resizeTimeout;
+  function handleResize() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      if (window.innerWidth > 768) {
+        DOM_ELEMENTS.mobileMenu.classList.remove('active');
+        DOM_ELEMENTS.mobileMenuToggle.setAttribute('aria-expanded', 'false');
+      }
+    }, 250);
+  }
+  
+  window.addEventListener('resize', handleResize);
 }
 
-// Add mobile menu styles
-function addMobileStyles() {
-    const style = document.createElement('style');
-    style.textContent = `
-        @media (max-width: 768px) {
-            .mobile-menu-btn {
-                background: none;
-                border: none;
-                color: var(--text-primary);
-                font-size: 1.2rem;
-                cursor: pointer;
-                padding: 0.5rem;
-                border-radius: 5px;
-                transition: all 0.3s ease;
-            }
-            
-            .mobile-menu-btn:hover {
-                background: var(--bg-secondary);
-            }
-            
-            .nav-list {
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                background: var(--header-bg);
-                backdrop-filter: blur(10px);
-                border-top: 1px solid var(--border-color);
-                flex-direction: column;
-                padding: 1rem;
-                gap: 1rem;
-                transform: translateY(-100%);
-                opacity: 0;
-                transition: all 0.3s ease;
-            }
-            
-            .nav-list.active {
-                transform: translateY(0);
-                opacity: 1;
-            }
-            
-            .nav {
-                position: relative;
-            }
-        }
-    `;
-    document.head.appendChild(style);
-}
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
 
-// Initialize everything when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
+/**
+ * Main initialization function
+ * Sets up all event listeners and initial state
+ */
+function initialize() {
+  try {
     // Initialize theme
     initializeTheme();
     
     // Setup event listeners
-    themeToggle.addEventListener('click', toggleTheme);
-    window.addEventListener('scroll', handleScroll);
+    if (DOM_ELEMENTS.themeToggle) {
+      DOM_ELEMENTS.themeToggle.addEventListener('click', toggleTheme);
+    }
     
-    // Setup other functionalities
+    // Setup scroll handling
+    window.addEventListener('scroll', throttledScrollHandler);
+    
+    // Setup smooth scrolling
     setupSmoothScrolling();
+    
+    // Setup contact functionality
     setupContactButtons();
     setupContactForm();
-    setupAnimations();
-    setupMobileMenu();
-    addMobileStyles();
     
-    // Handle system theme preference changes
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', initializeTheme);
-});
-
-// Performance optimization: Throttle scroll events
-function throttle(func, limit) {
-    let inThrottle;
-    return function() {
-        const args = arguments;
-        const context = this;
-        if (!inThrottle) {
-            func.apply(context, args);
-            inThrottle = true;
-            setTimeout(() => inThrottle = false, limit);
-        }
-    }
+    // Setup animations
+    setupAnimations();
+    
+    // Setup mobile menu
+    setupMobileMenu();
+    
+    console.log('Portfolio site initialized successfully');
+    
+  } catch (error) {
+    console.error('Error initializing portfolio site:', error);
+    showNotification('Error initializing site', 'error');
+  }
 }
 
-// Apply throttling to scroll handler
-window.addEventListener('scroll', throttle(handleScroll, 16)); // ~60fps
+// ============================================================================
+// EVENT LISTENERS
+// ============================================================================
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initialize);
+} else {
+  initialize();
+}

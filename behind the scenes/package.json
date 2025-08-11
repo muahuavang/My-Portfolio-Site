@@ -1,0 +1,54 @@
+{
+  "name": "my-portfolio-site",
+  "version": "1.0.0",
+  "description": "A modern, responsive portfolio website built with HTML, CSS, and JavaScript",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000 || python3 -m http.server 8000 || npx serve .",
+    "dev": "python -m http.server 8000 || python3 -m http.server 8000 || npx serve .",
+    "deploy": "git add . && git commit -m \"Update portfolio site\" && git push origin main",
+    "deploy:custom": "echo \"Usage: npm run deploy:custom -- 'Your commit message'\" && git add . && git commit -m \"$npm_config_message\" && git push origin main",
+    "build": "echo \"No build step required for static site\"",
+    "test": "echo \"Open index.html in browser to test\"",
+    "lint:html": "npx htmlhint index.html",
+    "lint:css": "npx stylelint styles.css",
+    "lint:js": "npx eslint script.js",
+    "lint": "npm run lint:html && npm run lint:css && npm run lint:js",
+    "format": "npx prettier --write \"*.{html,css,js,md}\"",
+    "optimize:images": "echo \"Use tools like TinyPNG or ImageOptim to compress images\"",
+    "validate": "npx html-validate index.html && npx stylelint styles.css && npx eslint script.js"
+  },
+  "keywords": [
+    "portfolio",
+    "website",
+    "responsive",
+    "html",
+    "css",
+    "javascript",
+    "github-pages"
+  ],
+  "author": "Muahua Ulysses Vang",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/muahuavang/My-Portfolio-Site.git"
+  },
+  "homepage": "https://muahuavang.github.io/My-Portfolio-Site/",
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "htmlhint": "^1.1.0",
+    "prettier": "^3.0.0",
+    "serve": "^14.0.0",
+    "stylelint": "^15.0.0",
+    "stylelint-config-standard": "^34.0.0",
+    "html-validate": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

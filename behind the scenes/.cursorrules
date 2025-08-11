@@ -1,0 +1,423 @@
+# Cursor Rules for Portfolio Site Development
+
+## 🚀 General Code Quality
+
+### Code Standards
+- Write clean, readable, maintainable code with consistent formatting and indentation
+- Use descriptive variable, function, and class names
+- **Naming Conventions:**
+  - `camelCase` for variables/functions
+  - `PascalCase` for classes/components
+  - `UPPER_CASE` for constants
+- Keep functions single-responsibility
+- Avoid excessive nesting; prefer early returns
+- Store secrets/config in `.env` files and never commit them
+- Separate frontend (`/client`) and backend (`/server`) code
+
+### Code Structure
+```javascript
+// ✅ Good: Single responsibility, early return
+function validateEmail(email) {
+  if (!email) return false;
+  if (!email.includes('@')) return false;
+  return email.length > 5;
+}
+
+// ❌ Bad: Nested conditions
+function validateEmail(email) {
+  if (email) {
+    if (email.includes('@')) {
+      if (email.length > 5) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+```
+
+## 📚 Documentation & Comments
+
+### File-Level Documentation
+- Add brief file-level description at the top of each file
+- Use docstrings for all functions and methods
+- Describe purpose, parameters, return values, and side effects
+- Add inline comments for non-obvious logic only
+- Avoid redundant comments that simply restate code
+
+### Documentation Examples
+```javascript
+/**
+ * Portfolio Site - Main JavaScript File
+ * Handles theme switching, smooth scrolling, and form validation
+ * @author Muahua Ulysses Vang
+ * @version 1.0.0
+ */
+
+/**
+ * Validates and submits the contact form
+ * @param {Event} event - Form submission event
+ * @returns {Promise<boolean>} Success status
+ */
+async function handleContactSubmit(event) {
+  // Prevent default form submission
+  event.preventDefault();
+  
+  // Validate form data
+  const formData = new FormData(event.target);
+  const email = formData.get('email');
+  
+  if (!isValidEmail(email)) {
+    showError('Please enter a valid email address');
+    return false;
+  }
+  
+  // ... rest of function
+}
+```
+
+## 🛡️ Error Handling & Edge Cases
+
+### Input Validation
+- Handle invalid inputs and unexpected states gracefully
+- Validate data from all external sources
+- Use specific exception handling over generic catch-alls
+- Provide meaningful error messages
+
+### Error Handling Examples
+```javascript
+// ✅ Good: Specific error handling
+try {
+  const response = await fetch('/api/contact', {
+    method: 'POST',
+    body: JSON.stringify(formData)
+  });
+  
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  
+  const result = await response.json();
+  return result;
+} catch (error) {
+  if (error.name === 'TypeError') {
+    console.error('Network error:', error.message);
+    showError('Network error. Please check your connection.');
+  } else {
+    console.error('API error:', error.message);
+    showError('Something went wrong. Please try again.');
+  }
+  return false;
+}
+
+// ❌ Bad: Generic error handling
+try {
+  // ... code
+} catch (error) {
+  console.error(error);
+  showError('Error occurred');
+}
+```
+
+## ⚡ Performance & Efficiency
+
+### Optimization Guidelines
+- Optimize for clarity first, then performance
+- Use appropriate data structures
+- Avoid unnecessary loops or repeated computations
+- Use pagination for large datasets
+- Implement lazy loading for images and heavy components
+
+### Performance Examples
+```javascript
+// ✅ Good: Efficient DOM manipulation
+const projectCards = document.querySelectorAll('.project-card');
+projectCards.forEach(card => {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate-in');
+        observer.unobserve(entry.target);
+      }
+    });
+  });
+  observer.observe(card);
+});
+
+// ❌ Bad: Inefficient repeated DOM queries
+function animateCards() {
+  const cards = document.querySelectorAll('.project-card');
+  cards.forEach(card => {
+    card.addEventListener('scroll', () => {
+      // This creates multiple event listeners
+    });
+  });
+}
+```
+
+## 🔒 Security
+
+### Security Standards
+- Never hardcode passwords, API keys, or sensitive data
+- Sanitize and validate all user inputs
+- Use prepared statements or ORM methods for database queries
+- Follow secure coding practices for the chosen tech stack
+- External links must use `target='_blank'` and `rel='noopener noreferrer'`
+
+### Security Examples
+```javascript
+// ✅ Good: Secure external links
+function createExternalLink(url, text) {
+  const link = document.createElement('a');
+  link.href = url;
+  link.textContent = text;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  return link;
+}
+
+// ✅ Good: Input sanitization
+function sanitizeInput(input) {
+  return input
+    .trim()
+    .replace(/[<>]/g, '') // Remove potential HTML tags
+    .substring(0, 1000);  // Limit length
+}
+
+// ❌ Bad: Unsafe external links
+function createLink(url, text) {
+  return `<a href="${url}">${text}</a>`;
+}
+```
+
+## 🧪 Testing & Maintainability
+
+### Code Quality
+- Write unit tests for all critical logic
+- Ensure new code passes all existing tests
+- Keep code modular and reusable
+- Avoid duplicated code by extracting helper functions
+- Use consistent error handling patterns
+
+### Maintainability Examples
+```javascript
+// ✅ Good: Reusable utility functions
+const utils = {
+  debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  },
+  
+  validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  },
+  
+  showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.remove();
+    }, 3000);
+  }
+};
+
+// ❌ Bad: Duplicated code
+function showSuccess(message) {
+  // ... duplicate notification code
+}
+
+function showError(message) {
+  // ... duplicate notification code
+}
+```
+
+## 📝 Version Control
+
+### Git Standards
+- Use Git with small, meaningful commits
+- Follow project branching and pull request guidelines
+- Write clear commit messages
+- Use conventional commit format
+
+### Commit Message Format
+```
+type(scope): description
+
+feat(contact): add form validation and submission
+fix(navigation): resolve mobile menu toggle issue
+docs(readme): update deployment instructions
+style(css): improve button hover animations
+refactor(js): extract utility functions to separate module
+test(validation): add unit tests for email validation
+```
+
+## 🎨 Frontend – Portfolio Page
+
+### Design Standards
+- Use mobile-first responsive design
+- Optimize images and lazy-load heavy components
+- Maintain consistent color palette, typography, and spacing
+- Use semantic HTML
+- Break UI into reusable components with clear names
+- Minimize inline CSS; prefer CSS modules, styled-components, or Tailwind
+
+### Portfolio Requirements
+- **About Section**: Personal introduction, skills, experience
+- **Projects Showcase**: Each project must have:
+  - Title
+  - Description
+  - Technologies used
+  - Live demo link
+  - GitHub link
+- **Contact Form**: Must validate inputs and provide success/error feedback
+
+### Component Structure
+```javascript
+// ✅ Good: Reusable component structure
+class ProjectCard {
+  constructor(project) {
+    this.project = project;
+    this.element = this.createCard();
+  }
+  
+  createCard() {
+    const card = document.createElement('article');
+    card.className = 'project-card';
+    card.innerHTML = `
+      <h3>${this.project.title}</h3>
+      <p>${this.project.description}</p>
+      <div class="technologies">
+        ${this.project.technologies.map(tech => 
+          `<span class="tech-tag">${tech}</span>`
+        ).join('')}
+      </div>
+      <div class="project-links">
+        <a href="${this.project.demo}" target="_blank" rel="noopener noreferrer">
+          Live Demo
+        </a>
+        <a href="${this.project.github}" target="_blank" rel="noopener noreferrer">
+          GitHub
+        </a>
+      </div>
+    `;
+    return card;
+  }
+}
+```
+
+## 🔧 Backend – Functionality
+
+### Architecture Standards
+- Organize code into controllers, services, models, and routes
+- Follow RESTful API conventions
+- Keep functions small and single-purpose
+- Use ORM or parameterized queries to prevent SQL injection
+- Validate all incoming data
+- Implement database migration scripts
+
+### Security & Authentication
+- Use secure authentication (JWT, OAuth, or session-based)
+- Hash passwords with bcrypt or Argon2
+- Rate-limit sensitive endpoints
+- Standardize API responses
+
+### API Response Format
+```javascript
+// Standard API response format
+{
+  success: boolean,
+  message: string,
+  data?: any,
+  timestamp: string,
+  statusCode: number
+}
+
+// Example responses
+{
+  success: true,
+  message: "Contact form submitted successfully",
+  data: { id: "contact_123" },
+  timestamp: "2024-01-15T10:30:00Z",
+  statusCode: 201
+}
+
+{
+  success: false,
+  message: "Invalid email format",
+  data: null,
+  timestamp: "2024-01-15T10:30:00Z",
+  statusCode: 400
+}
+```
+
+## 🔗 Full-Stack Integration
+
+### API Standards
+- Maintain documented API contract between frontend and backend
+- Document API endpoints in README or with Swagger/OpenAPI
+- Configure CORS securely, only allowing necessary origins
+- Test all frontend API calls before deployment
+
+### CORS Configuration
+```javascript
+// ✅ Good: Secure CORS configuration
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGINS?.split(',') || [
+    'https://muahuavang.github.io',
+    'http://localhost:3000'
+  ],
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+
+// ❌ Bad: Open CORS
+app.use(cors());
+```
+
+## 📋 Code Review Checklist
+
+Before committing code, ensure:
+- [ ] Code follows naming conventions
+- [ ] Functions are single-responsibility
+- [ ] Error handling is implemented
+- [ ] Input validation is in place
+- [ ] Security best practices are followed
+- [ ] Performance considerations are addressed
+- [ ] Documentation is complete
+- [ ] Tests pass (if applicable)
+- [ ] No sensitive data is exposed
+- [ ] Code is modular and reusable
+
+## 🚨 Common Anti-Patterns to Avoid
+
+- ❌ Hardcoded credentials or API keys
+- ❌ Generic error messages
+- ❌ Inline styles in HTML
+- ❌ Duplicated code blocks
+- ❌ Deeply nested conditionals
+- ❌ Unvalidated user inputs
+- ❌ Unsafe external links
+- ❌ Large, monolithic functions
+- ❌ Missing error handling
+- ❌ Inconsistent naming conventions
+
+## 📚 Resources
+
+- [MDN Web Docs](https://developer.mozilla.org/)
+- [Web.dev Best Practices](https://web.dev/learn/)
+- [OWASP Security Guidelines](https://owasp.org/)
+- [Google Web Fundamentals](https://developers.google.com/web/fundamentals)
+- [CSS Guidelines](https://cssguidelin.es/)
+- [JavaScript Best Practices](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide)

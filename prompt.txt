@@ -1,2 +1,4 @@
 All of my ideas/prompts post initial version
 
+1. Implemented rules from chatgpt for cursor to follow that will keep code clean and professional
+2. 
