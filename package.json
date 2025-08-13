@@ -8,15 +8,15 @@
     "dev": "python -m http.server 8000 || python3 -m http.server 8000 || npx serve .",
     "deploy": "git add . && git commit -m \"Update portfolio site\" && git push origin main",
     "deploy:custom": "echo \"Usage: npm run deploy:custom -- 'Your commit message'\" && git add . && git commit -m \"$npm_config_message\" && git push origin main",
-    "build": "echo \"No build step required for static site\"",
+    "build": "tsc",
     "test": "echo \"Open index.html in browser to test\"",
     "lint:html": "npx htmlhint index.html",
     "lint:css": "npx stylelint styles.css",
-    "lint:js": "npx eslint script.js",
-    "lint": "npm run lint:html && npm run lint:css && npm run lint:js",
-    "format": "npx prettier --write \"*.{html,css,js,md}\"",
+    "lint:ts": "tsc -p . --noEmit",
+    "lint": "npm run lint:html && npm run lint:css && npm run lint:ts",
+    "format": "npx prettier --write \"*.{html,css,js,md,ts}\"",
     "optimize:images": "echo \"Use tools like TinyPNG or ImageOptim to compress images\"",
-    "validate": "npx html-validate index.html && npx stylelint styles.css && npx eslint script.js",
+    "validate": "npx html-validate index.html && npx stylelint styles.css && tsc -p . --noEmit",
     "audit": "npm audit --audit-level moderate",
     "clean": "rm -rf node_modules package-lock.json",
     "reinstall": "npm run clean && npm install"
@@ -64,20 +64,24 @@
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-promise": "^6.1.1",
+    "html-validate": "^8.12.0",
     "htmlhint": "^1.1.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
     "prettier": "^3.2.5",
     "serve": "^14.2.1",
     "stylelint": "^16.2.1",
     "stylelint-config-standard": "^36.0.0",
     "stylelint-order": "^6.0.4",
-    "html-validate": "^8.12.0",
-    "husky": "^9.0.11",
-    "lint-staged": "^15.2.2"
+    "typescript": "^5.5.4"
   },
   "dependencies": {},
   "lint-staged": {
     "*.js": [
       "eslint --fix",
+      "prettier --write"
+    ],
+    "*.ts": [
       "prettier --write"
     ],
     "*.css": [
@@ -126,23 +130,5 @@
       "selector-class-pattern": null,
       "no-descending-specificity": null
     }
-  },
-  "scripts": {
-    "start": "python -m http.server 8000 || python3 -m http.server 8000 || npx serve .",
-    "dev": "python -m http.server 8000 || python3 -m http.server 8000 || npx serve .",
-    "deploy": "git add . && git commit -m \"Update portfolio site\" && git push origin main",
-    "deploy:custom": "echo \"Usage: npm run deploy:custom -- 'Your commit message'\" && git add . && git commit -m \"$npm_config_message\" && git push origin main",
-    "build": "echo \"No build step required for static site\"",
-    "test": "echo \"Open index.html in browser to test\"",
-    "lint:html": "npx htmlhint index.html",
-    "lint:css": "npx stylelint styles.css",
-    "lint:js": "npx eslint script.js",
-    "lint": "npm run lint:html && npm run lint:css && npm run lint:js",
-    "format": "npx prettier --write \"*.{html,css,js,md}\"",
-    "optimize:images": "echo \"Use tools like TinyPNG or ImageOptim to compress images\"",
-    "validate": "npx html-validate index.html && npx stylelint styles.css && npx eslint script.js",
-    "audit": "npm audit --audit-level moderate",
-    "clean": "rm -rf node_modules package-lock.json",
-    "reinstall": "npm run clean && npm install"
   }
 }

@@ -1,0 +1,12 @@
+# Node
+node_modules/
+
+# TypeScript build output
+# Keep dist in repo so static hosting can load compiled JS
+*.map
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
